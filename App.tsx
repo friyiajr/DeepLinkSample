@@ -10,6 +10,7 @@ import dynamicLinks, {
 import HomeScreen from './HomeScreen';
 import ScreenTwo from './Screen2';
 import ScreenThree from './Screen3';
+import NotificationManager, {AnyNotification} from './PushNotificationManager';
 
 type Screen = {
   name: string;
@@ -45,11 +46,15 @@ const linking: LinkingOptions = {
     const url = await Linking.getInitialURL();
 
     const dynamicLinkUrl = await dynamicLinks().getInitialLink();
+    const initialPushNotification =
+      await NotificationManager.getInitialPushNotification();
+
+    if (initialPushNotification && initialPushNotification?.data?.deeplink) {
+      return initialPushNotification?.data?.deeplink;
+    }
 
     if (dynamicLinkUrl) {
-      console.log(dynamicLinkUrl.url);
       return dynamicLinkUrl.url;
-      // return 'mylinker://screen3'
     }
 
     if (url) {
@@ -67,6 +72,16 @@ const linking: LinkingOptions = {
 
     // Listen to incoming links from deep linking
     Linking.addEventListener('url', onReceiveURL);
+
+    const onNotificationRecieved = (notification: AnyNotification) => {
+      if (notification?.data?.deeplink) {
+        listener(notification?.data?.deeplink);
+      }
+    };
+
+    NotificationManager.setNotificationForwardingFunction(
+      onNotificationRecieved,
+    );
 
     const handleDynamicLink = (
       dynamicLink: FirebaseDynamicLinksTypes.DynamicLink,
