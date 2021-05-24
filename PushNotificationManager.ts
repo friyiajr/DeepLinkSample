@@ -63,6 +63,18 @@ class PushNotificationManager {
       // Requestion permissions on startup
       requestPermissions: true,
     });
+
+    PushNotification.createChannel(
+      {
+        channelId: 'REMOTE_NOTIFICATIONS',
+        channelName: 'Remote Notifications',
+        channelDescription: 'Remote notifications for this app',
+        soundName: 'default',
+        importance: 4,
+        vibrate: true,
+      },
+      created => console.log(created),
+    );
   }
 
   async getInitialPushNotification(): Promise<ReceivedNotification | null> {
